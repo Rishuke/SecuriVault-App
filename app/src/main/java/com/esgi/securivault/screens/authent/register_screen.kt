@@ -72,7 +72,7 @@ fun RegisterScreen(
                     onClick = onNavigateToLogin,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Déjà connecter?  Login")
+                    Text("Déjà connecté?  Login")
                 }
                 error?.let {
                     Spacer(modifier = Modifier.height(8.dp))

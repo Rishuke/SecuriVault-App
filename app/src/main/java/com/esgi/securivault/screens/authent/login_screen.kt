@@ -8,18 +8,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.Navigation
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.esgi.securivault.ui.theme.NavigationComposeTheme
+import com.esgi.securivault.viewmodels.LoginViewModel
 
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    viewModel: LoginViewModel = viewModel()
 ) {
     NavigationComposeTheme {
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var error by remember { mutableStateOf<String?>(null) }
+        val email by viewModel.email
+        val password by viewModel.password
+        val error by viewModel.error
+        val isLoading by viewModel.isLoading
+        val loginSuccess by viewModel.loginSuccess
+
+        // Si login réussi, on déclenche la navigation
+        LaunchedEffect(loginSuccess) {
+            if (loginSuccess) {
+                onLoginSuccess()
+            }
+        }
 
         Scaffold { innerPadding ->
             Column(
@@ -32,30 +43,32 @@ fun LoginScreen(
             ) {
                 TextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = { viewModel.email.value = it },
                     label = { Text("Email") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { viewModel.password.value = it },
                     label = { Text("Password") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = {
-                        // Mock login: accept any non-empty credentials
-                        if (email.isNotBlank() && password.isNotBlank()) {
-                            onLoginSuccess()
-                        } else {
-                            error = "Entrer un email et un mot de passe valides"
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = { viewModel.login() },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isLoading
                 ) {
-                    Text("Login")
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Login")
+                    }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(
@@ -71,14 +84,4 @@ fun LoginScreen(
             }
         }
     }
-    }
-
-
-@Preview
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen(
-        onLoginSuccess = {},
-        onNavigateToRegister = {}
-    )
 }
