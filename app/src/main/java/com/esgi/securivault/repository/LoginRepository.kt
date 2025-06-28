@@ -1,5 +1,6 @@
 package com.esgi.securivault.repository
 
+import android.util.Log
 import com.esgi.securivault.data.dto.LoginRequest
 import com.esgi.securivault.data.dto.LoginResponse
 import com.esgi.securivault.networking.services.LoginServices
@@ -16,13 +17,15 @@ class LoginRepository {
                     response: retrofit2.Response<LoginResponse>
                 ) {
                     if (response.isSuccessful) {
-                        callback(response.body()?.idtoken)
+                        callback(response.body()?.idToken)
                     } else {
+                        Log.e("LoginRepository",  "Erreur: ${response.code()} - ${response.errorBody()?.string()}")
                         callback(null)
                     }
                 }
 
                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                    Log.e("LoginRepository",  "Erreur: ${t.localizedMessage}", t)
                     callback(null)
                 }
             })

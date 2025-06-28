@@ -6,6 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface RegisterServices{
-    @POST("localhost:8080/auth")
+    @POST("auth")
     fun createUser(@Body registerDTO: RegisterDTO): Call<RegisterDTO>
 }

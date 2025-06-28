@@ -4,10 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.esgi.securivault.composables.NavTopBar
@@ -39,22 +43,14 @@ class MainActivity : ComponentActivity() {
                         onNavigateToRegister = { screen = "register" }
                     )
                 }
-
                 !isAuthenticated && screen == "register" -> {
                     RegisterScreen(
                         onRegisterSuccess = { screen = "login" },
                         onNavigateToLogin = { screen = "login" }
                     )
                 }
-
-                else -> {
-                    SimpleNavigation(
-                        modifier = Modifier.fillMaxSize(),
-                        onDeconnexion = {
-                            isAuthenticated = false
-                            screen = "login"
-                        }
-                    )
+                isAuthenticated -> {
+                    SimpleNavigation()
                 }
             }
         }
@@ -62,7 +58,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SimpleNavigation(modifier: Modifier = Modifier, onDeconnexion: () -> Unit = {}) {
+fun SimpleNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
 
@@ -76,11 +72,11 @@ fun SimpleNavigation(modifier: Modifier = Modifier, onDeconnexion: () -> Unit = 
                     title = "Navigation Compose",
                     destination = navTab,
                     onBackPressed =
-                    { screen ->
-                        navController.navigateToTop(screen.route)
+                        { screen ->
+                            navController.navigateToTop(screen.route)
 
 
-                    },
+                        },
                     currentDestination = currentDestination
                 )
             }
@@ -89,12 +85,11 @@ fun SimpleNavigation(modifier: Modifier = Modifier, onDeconnexion: () -> Unit = 
                 modifier = Modifier.padding(innerPadding),
                 navController = navController,
             )
-            Button(
-                onClick = onDeconnexion,
-                modifier = Modifier.padding(innerPadding)
-            ) { }
+
         }
+
     }
+
 }
 
 @Preview(showBackground = true)
