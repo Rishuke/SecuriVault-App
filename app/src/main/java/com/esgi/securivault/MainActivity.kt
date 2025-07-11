@@ -4,18 +4,28 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.esgi.securivault.composables.NavTopBar
 import com.esgi.securivault.destinations.HomeScreen
 import com.esgi.securivault.destinations.navTab
+import com.esgi.securivault.screens.authent.LoginScreen
+import com.esgi.securivault.screens.authent.RegisterScreen
 import com.esgi.securivault.ui.theme.NavigationComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,7 +33,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SimpleNavigation()
+            var isAuthenticated by remember { mutableStateOf(false) }
+            var screen by remember { mutableStateOf("login") }
+
+            when {
+                !isAuthenticated && screen == "login" -> {
+                    LoginScreen(
+                        onLoginSuccess = { isAuthenticated = true },
+                        onNavigateToRegister = { screen = "register" }
+                    )
+                }
+                !isAuthenticated && screen == "register" -> {
+                    RegisterScreen(
+                        onRegisterSuccess = { screen = "login" },
+                        onNavigateToLogin = { screen = "login" }
+                    )
+                }
+                isAuthenticated -> {
+                    SimpleNavigation()
+                }
+            }
         }
     }
 }
@@ -43,11 +72,11 @@ fun SimpleNavigation(modifier: Modifier = Modifier) {
                     title = "Navigation Compose",
                     destination = navTab,
                     onBackPressed =
-                    { screen ->
-                        navController.navigateToTop(screen.route)
+                        { screen ->
+                            navController.navigateToTop(screen.route)
 
 
-                    },
+                        },
                     currentDestination = currentDestination
                 )
             }
