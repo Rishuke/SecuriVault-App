@@ -2,8 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose.compiler)
+    id("com.google.gms.google-services") version "4.4.3"
+    id("com.google.dagger.hilt.android") version "2.51"
 
-
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -18,9 +20,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -32,6 +32,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -46,48 +47,50 @@ android {
         kotlinCompilerExtensionVersion = "2.0.0"
     }
     packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-stdlib")) {
+                useVersion("2.0.0")
+            }
         }
     }
+
 }
 
 dependencies {
-
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
 
-    // UI
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     implementation(libs.googleid)
-    implementation(libs.androidx.benchmark.macro)
-    testImplementation(libs.junit)
+    implementation(libs.play.services.auth.v2041)
 
-    // TEST
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.navigation.compose)
-    implementation (libs.androidx.credentials)
-    implementation( libs.androidx.credentials.play.services.auth)
-    implementation (libs.googleid.vlatestversion)
-    implementation (libs.play.services.auth.v2041)
-    // Navigation
-    implementation (libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.compose)
 
-    //Retrofit
     implementation(libs.converter.gson)
-    implementation(libs.retrofit)
     implementation(libs.retrofit2.retrofit)
     implementation(libs.retrofit2.converter.gson)
 
+    // Hilt
+    // Hilt
+    implementation(libs.dagger.hilt.android)
+    kapt(libs.dagger.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
+
+    // Firebase Auth
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 }

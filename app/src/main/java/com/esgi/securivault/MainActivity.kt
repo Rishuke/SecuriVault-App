@@ -1,24 +1,19 @@
 package com.esgi.securivault
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.esgi.securivault.composables.NavTopBar
@@ -27,7 +22,11 @@ import com.esgi.securivault.destinations.navTab
 import com.esgi.securivault.screens.authent.LoginScreen
 import com.esgi.securivault.screens.authent.RegisterScreen
 import com.esgi.securivault.ui.theme.NavigationComposeTheme
+import com.esgi.securivault.viewmodels.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,11 +35,32 @@ class MainActivity : ComponentActivity() {
             var isAuthenticated by remember { mutableStateOf(false) }
             var screen by remember { mutableStateOf("login") }
 
+            val viewModel: LoginViewModel = hiltViewModel()
+
+            val googleSignInLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                if (task.isSuccessful) {
+                    val account = task.result
+                    account.idToken?.let { idToken ->
+                        viewModel.firebaseAuthWithGoogle(idToken)
+                    }
+                }
+            }
+
+            if (viewModel.loginSuccess.value) {
+                isAuthenticated = true
+            }
+
             when {
                 !isAuthenticated && screen == "login" -> {
                     LoginScreen(
                         onLoginSuccess = { isAuthenticated = true },
-                        onNavigateToRegister = { screen = "register" }
+                        onNavigateToRegister = { screen = "register" },
+                        onGoogleLogin = {
+                            viewModel.launchGoogleSignIn(googleSignInLauncher, this)
+                        }
                     )
                 }
                 !isAuthenticated && screen == "register" -> {
@@ -71,12 +91,9 @@ fun SimpleNavigation(modifier: Modifier = Modifier) {
                 NavTopBar(
                     title = "Navigation Compose",
                     destination = navTab,
-                    onBackPressed =
-                        { screen ->
-                            navController.navigateToTop(screen.route)
-
-
-                        },
+                    onBackPressed = { screen ->
+                        navController.navigateToTop(screen.route)
+                    },
                     currentDestination = currentDestination
                 )
             }
@@ -84,21 +101,6 @@ fun SimpleNavigation(modifier: Modifier = Modifier) {
             AppNavHost(
                 modifier = Modifier.padding(innerPadding),
                 navController = navController,
-            )
-
-        }
-
-    }
-
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview( modifier: Modifier = Modifier) {
-    NavigationComposeTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            SimpleNavigation(
-                modifier = Modifier.padding(innerPadding)
             )
         }
     }

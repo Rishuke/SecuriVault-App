@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1085388833545",
+    "firebase_url": "https://projet-annuel-b3477-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "projet-annuel-b3477",
+    "storage_bucket": "projet-annuel-b3477.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1085388833545:android:856512fb167b63856e49d8",
+        "android_client_info": {
+          "package_name": "com.esgi.securivault"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1085388833545-r1vt66v1lhd9m653jfi8859cli01iabu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.esgi.securivault",
+            "certificate_hash": "d47d73eb4e7860ae01b16fc0fbd5e3c70bca2363"
+          }
+        },
+        {
+          "client_id": "1085388833545-a52jbe0hfrt3k4jh8ff9c6fvpinrit3l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuTp3bwBMP2ym6ZGuJ7ZGfj100Y-6dg2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1085388833545-a52jbe0hfrt3k4jh8ff9c6fvpinrit3l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

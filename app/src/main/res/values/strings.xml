@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SecuriVault</string>
+    <string name="default_web_client_id">1085388833545-r1vt66v1lhd9m653jfi8859cli01iabu.apps.googleusercontent.com</string>
+
 </resources>
