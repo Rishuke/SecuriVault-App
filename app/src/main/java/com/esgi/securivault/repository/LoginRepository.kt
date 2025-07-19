@@ -4,7 +4,7 @@ import android.util.Log
 import com.esgi.securivault.data.dto.LoginRequest
 import com.esgi.securivault.data.dto.LoginResponse
 import com.esgi.securivault.networking.services.LoginServices
-import com.esgi.securivault.networking.services.RetrofitHttpClient
+import com.esgi.securivault.networking.RetrofitHttpClient
 import retrofit2.Call
 
 class LoginRepository {
