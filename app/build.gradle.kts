@@ -84,6 +84,7 @@ dependencies {
     // Hilt
     // Hilt
     implementation(libs.dagger.hilt.android)
+    implementation(libs.androidx.animation.core.lint)
     kapt(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -93,4 +94,6 @@ dependencies {
 
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    implementation (libs.androidx.material.icons.extended)
 }

@@ -1,4 +1,4 @@
-package com.esgi.securivault.networking.services
+package com.esgi.securivault.networking
 
 
 import retrofit2.Retrofit
