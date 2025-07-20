@@ -1,6 +1,8 @@
 // screens/LedColorScreen.kt
 package com.esgi.securivault.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,17 +11,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.esgi.securivault.viewmodels.SuitcaseViewModel
-
 
 @Composable
 fun LedColorScreen(
@@ -41,17 +48,15 @@ fun LedColorScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.setSuitcaseId("your_suitcase_id") // À remplacer par l'ID réel
+        viewModel.setSuitcaseId("valise002")
     }
 
-    // Mettre à jour la couleur sélectionnée depuis l'état si disponible
     LaunchedEffect(uiState.suitcase?.ledColor) {
         uiState.suitcase?.ledColor?.let { color ->
             selectedColor = color
         }
     }
 
-    // Gérer l'affichage des messages
     LaunchedEffect(uiState.successMessage, uiState.errorMessage) {
         if (uiState.successMessage != null || uiState.errorMessage != null) {
             kotlinx.coroutines.delay(3000)
@@ -59,122 +64,246 @@ fun LedColorScreen(
         }
     }
 
+    // Couleur sélectionnée pour l'animation
+    val selectedColorValue = availableColors.find { it.first == selectedColor }?.second ?: Color.Red
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = selectedColorValue.copy(alpha = 0.1f),
+        animationSpec = tween(600),
+        label = "background_color"
+    )
+
+    // Gradient dynamique basé sur la couleur sélectionnée
+    val gradientColors = remember(selectedColorValue) {
+        listOf(
+            Color(0xFF0F0F23),
+            Color(0xFF1A1A2E),
+            selectedColorValue.copy(alpha = 0.2f),
+            selectedColorValue.copy(alpha = 0.05f)
+        )
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = Color.Magenta)
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+            .background(
+                brush = Brush.radialGradient(
+                    colors = gradientColors,
+                    radius = 1200f
+                )
+            )
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.9f))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
+            // Titre avec icône animée
             Column(
-                modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Couleur LED",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color.Black
+                Icon(
+                    imageVector = Icons.Default.Lightbulb,
+                    contentDescription = "LED",
+                    tint = selectedColorValue,
+                    modifier = Modifier.size(80.dp)
                 )
-
                 Text(
-                    text = "Couleur sélectionnée: ${selectedColor.uppercase()}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black
+                    text = "COULEUR",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    ),
+                    color = Color.White
                 )
+                Text(
+                    text = "LED",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Light,
+                        letterSpacing = 1.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+            }
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(4),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth()
+            // Affichage de la couleur sélectionnée - grand aperçu central
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.1f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(availableColors) { (colorName, colorValue) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        // Aperçu de la couleur
                         Box(
                             modifier = Modifier
                                 .size(60.dp)
                                 .clip(CircleShape)
-                                .background(colorValue)
-                                .border(
-                                    width = if (selectedColor == colorName) 4.dp else 2.dp,
-                                    color = if (selectedColor == colorName) Color.Black else Color.Gray,
-                                    shape = CircleShape
-                                )
-                                .clickable {
-                                    selectedColor = colorName
-                                }
+                                .background(selectedColorValue)
+                                .border(3.dp, Color.White, CircleShape)
+                        )
+
+                        Text(
+                            text = selectedColor.uppercase(),
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = Color.White
                         )
                     }
                 }
+            }
 
-                Button(
-                    onClick = {
-                        viewModel.updateLedColor(selectedColor)
-                    },
-                    enabled = !uiState.isLoading,
-                    modifier = Modifier.fillMaxWidth()
+            // Grille de sélection des couleurs améliorée
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.1f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(color = Color.White)
-                    } else {
-                        Text("Appliquer la Couleur")
+                    Text(
+                        text = "Choisissez une couleur",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
+
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(4),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(availableColors) { (colorName, colorValue) ->
+                            val isSelected = selectedColor == colorName
+
+                            Box(
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .shadow(
+                                        elevation = if (isSelected) 12.dp else 6.dp,
+                                        shape = CircleShape
+                                    )
+                                    .clip(CircleShape)
+                                    .background(colorValue)
+                                    .border(
+                                        width = if (isSelected) 4.dp else 0.dp,
+                                        color = Color.White,
+                                        shape = CircleShape
+                                    )
+                                    .clickable {
+                                        selectedColor = colorName
+                                    }
+                            ) {
+                                if (isSelected) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                Color.White.copy(alpha = 0.3f),
+                                                CircleShape
+                                            )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
+            }
 
-                // Messages d'état
+            // Bouton d'action stylisé
+            Button(
+                onClick = {
+                    viewModel.updateLedColor(selectedColor)
+                },
+                enabled = !uiState.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .clip(RoundedCornerShape(30.dp)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = selectedColorValue,
+                    contentColor = if (selectedColor == "white") Color.Black else Color.White
+                )
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        color = if (selectedColor == "white") Color.Black else Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        "APPLIQUER LA COULEUR",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                    )
+                }
+            }
+
+            // Messages d'état
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 uiState.successMessage?.let { message ->
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.Green.copy(alpha = 0.1f))
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Green.copy(alpha = 0.2f)
+                        )
                     ) {
                         Text(
                             text = message,
-                            color = Color.Green.copy(red = 0.2f),
-                            modifier = Modifier.padding(12.dp)
+                            color = Color.Green,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
 
                 uiState.errorMessage?.let { message ->
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.1f))
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Red.copy(alpha = 0.2f)
+                        )
                     ) {
                         Text(
                             text = message,
                             color = Color.Red,
-                            modifier = Modifier.padding(12.dp)
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier.padding(16.dp)
                         )
                     }
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun DigicodeViewScreenPreview() {
-    Scaffold { innerPadding ->
-        DigicodeViewScreen(modifier = Modifier.padding(innerPadding))
-    }
-}
-
-@Preview
-@Composable
-fun BuzzerSoundScreenPreview() {
-    Scaffold { innerPadding ->
-        BuzzerSoundScreen(modifier = Modifier.padding(innerPadding))
-    }
-}
-
-@Preview
-@Composable
-fun LedColorScreenPreview() {
-    Scaffold { innerPadding ->
-        LedColorScreen(modifier = Modifier.padding(innerPadding))
     }
 }
