@@ -45,7 +45,6 @@ fun BuzzerSoundScreen(
         }
     }
 
-    // Gradient dynamique basé sur la fréquence
     val gradientColors = remember(frequency) {
         val intensity = (frequency - 200f) / (5000f - 200f)
         listOf(
