@@ -35,8 +35,8 @@ fun DigicodeViewScreen(
     var isViewMode by remember { mutableStateOf(true) }
     var showCurrentCode by remember { mutableStateOf(false) }
 
-    // Code actuel simulé - en pratique, récupéré depuis le ViewModel
-    val currentCode = "1234" // Remplacer par viewModel.currentCode
+    // État local pour le code actuel qui sera mis à jour
+    var currentCode by remember { mutableStateOf("1234") }
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -48,6 +48,14 @@ fun DigicodeViewScreen(
         if (uiState.successMessage != null || uiState.errorMessage != null) {
             kotlinx.coroutines.delay(3000)
             viewModel.clearMessages()
+        }
+    }
+
+    // Observer les changements de code réussis
+    LaunchedEffect(uiState.successMessage) {
+        if (uiState.successMessage != null && newCode.isNotEmpty()) {
+            currentCode = newCode // Met à jour le code affiché
+            isViewMode = true // Retourne automatiquement en mode consultation
         }
     }
 
@@ -104,8 +112,8 @@ fun DigicodeViewScreen(
                     onSaveCode = {
                         if (newCode == confirmCode && newCode.isNotEmpty()) {
                             viewModel.changeCode(newCode)
-                            newCode = ""
-                            confirmCode = ""
+                            // Note: currentCode sera mis à jour dans LaunchedEffect ci-dessus
+                            // après confirmation du succès
                         }
                     },
                     isLoading = uiState.isLoading,
