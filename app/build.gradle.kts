@@ -99,4 +99,13 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
     implementation (libs.androidx.material.icons.extended)
+
+    implementation (libs.maps.compose)
+    implementation (libs.play.services.maps)
+    implementation (libs.osmdroid.android)
+
+    // Pour les requêtes HTTP (si pas déjà présent)
+    implementation (libs.kotlinx.coroutines.android)
+
+
 }
