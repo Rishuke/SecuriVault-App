@@ -1,7 +1,12 @@
 package com.esgi.securivault.screens
 
+import android.app.Activity
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,56 +20,90 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.esgi.securivault.screens.authent.LoginScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF0D1B2A),
-                        Color(0xFF1B263B),
-                        Color(0xFF415A77)
-                    ),
-                    radius = 1200f
-                )
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    BackHandler {
+        Log.d("BackHandler", "Back pressed on HomeScreen — Navigate to Login")
+        navController.navigate("login") {
+            popUpTo(0) { inclusive = true }
+        }
+    }
+
+
+
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("", color = Color.White, fontSize = 16.sp) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Retour",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+                modifier = Modifier.height(68.dp)
             )
-    ) {
-        Column(
-            modifier = Modifier
+        },
+        containerColor = Color.Transparent
+    ) { innerPadding ->
+        Box(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(innerPadding)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF0D1B2A),
+                            Color(0xFF1B263B),
+                            Color(0xFF415A77)
+                        ),
+                        radius = 1200f
+                    )
+                )
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Header avec titre
-            WelcomeSection()
-
-            Spacer(modifier = Modifier.height(60.dp))
-
-            // Coffre-fort principal
-            SafeVaultDisplay()
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Statut et informations
-            StatusSection()
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Footer avec sécurité
-            SecurityFooter()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item { WelcomeSection() }
+                item { Spacer(Modifier.height(60.dp)) }
+                item { SafeVaultDisplay() }
+                item { Spacer(Modifier.height(40.dp)) }
+                item { StatusSection() }
+                item { Spacer(Modifier.height(40.dp)) }
+                item { SecurityFooter() }
+            }
         }
     }
 }
+
 
 @Composable
 private fun WelcomeSection() {
@@ -305,6 +344,7 @@ private fun SecurityFooter() {
 @Composable
 fun HomeScreenPreview() {
     MaterialTheme {
-        HomeScreen()
+        val navController = rememberNavController()
+        HomeScreen(modifier = Modifier, navController = navController)
     }
 }

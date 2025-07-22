@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.esgi.securivault.destinations.AppNavigation
 import com.esgi.securivault.destinations.HomeScreen
 
@@ -91,7 +92,9 @@ fun CustomNavTab(
         Text(
             text = title,
             color = tabTintColor,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontSize = 12.sp
+            )
         )
     }
 

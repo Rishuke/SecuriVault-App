@@ -2,8 +2,10 @@ package com.esgi.securivault.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -34,8 +36,6 @@ fun DigicodeViewScreen(
     var showPassword by remember { mutableStateOf(false) }
     var isViewMode by remember { mutableStateOf(true) }
     var showCurrentCode by remember { mutableStateOf(false) }
-
-    // État local pour le code actuel qui sera mis à jour
     var currentCode by remember { mutableStateOf("1234") }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -51,11 +51,10 @@ fun DigicodeViewScreen(
         }
     }
 
-    // Observer les changements de code réussis
     LaunchedEffect(uiState.successMessage) {
         if (uiState.successMessage != null && newCode.isNotEmpty()) {
-            currentCode = newCode // Met à jour le code affiché
-            isViewMode = true // Retourne automatiquement en mode consultation
+            currentCode = newCode
+            isViewMode = true
         }
     }
 
@@ -75,33 +74,30 @@ fun DigicodeViewScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Header
             CodeHeader()
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Mode selector
             ModeSelector(
                 isViewMode = isViewMode,
                 onModeChange = { isViewMode = it }
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             if (isViewMode) {
-                // Mode consultation
                 CodeViewSection(
                     currentCode = currentCode,
                     showCurrentCode = showCurrentCode,
                     onToggleVisibility = { showCurrentCode = !showCurrentCode }
                 )
             } else {
-                // Mode modification
                 CodeChangeSection(
                     newCode = newCode,
                     confirmCode = confirmCode,
@@ -112,8 +108,6 @@ fun DigicodeViewScreen(
                     onSaveCode = {
                         if (newCode == confirmCode && newCode.isNotEmpty()) {
                             viewModel.changeCode(newCode)
-                            // Note: currentCode sera mis à jour dans LaunchedEffect ci-dessus
-                            // après confirmation du succès
                         }
                     },
                     isLoading = uiState.isLoading,
@@ -121,13 +115,15 @@ fun DigicodeViewScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Messages d'état
             StatusMessages(uiState)
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
+
 
 @Composable
 private fun CodeHeader() {
@@ -242,7 +238,7 @@ private fun CodeViewSection(
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(32.dp),
+            modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -254,13 +250,43 @@ private fun CodeViewSection(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Affichage style carte bancaire
-            BankCardCodeDisplay(
-                code = currentCode,
-                isVisible = showCurrentCode
-            )
+            // Case PIN responsive
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                currentCode.take(4).forEach { digit ->
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f),  // carré responsive
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Black.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(
+                                text = if (showCurrentCode) digit.toString() else "•",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp
+                                ),
+                                color = Color(0xFF64FFDA)
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -287,6 +313,7 @@ private fun CodeViewSection(
         }
     }
 }
+
 
 @Composable
 private fun BankCardCodeDisplay(

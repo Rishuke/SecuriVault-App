@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.esgi.securivault.viewmodels.SuitcaseViewModel
 import kotlin.math.roundToInt
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+
 
 @Composable
 fun BuzzerSoundScreen(
@@ -28,14 +31,10 @@ fun BuzzerSoundScreen(
     var frequency by remember { mutableFloatStateOf(1000f) }
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.setSuitcaseId("valise002")
-    }
+    LaunchedEffect(Unit) { viewModel.setSuitcaseId("valise002") }
 
     LaunchedEffect(uiState.suitcase?.buzzerFreq) {
-        uiState.suitcase?.buzzerFreq?.let { freq ->
-            frequency = freq.toFloat()
-        }
+        uiState.suitcase?.buzzerFreq?.let { frequency = it.toFloat() }
     }
 
     LaunchedEffect(uiState.successMessage, uiState.errorMessage) {
@@ -58,133 +57,66 @@ fun BuzzerSoundScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.radialGradient(
-                    colors = gradientColors,
-                    radius = 1000f
-                )
-            )
+            .background(Brush.radialGradient(colors = gradientColors, radius = 1000f))
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Titre avec icône
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.VolumeUp,
-                    contentDescription = "Buzzer",
-                    tint = Color.White,
-                    modifier = Modifier.size(80.dp)
-                )
-                Text(
-                    text = "CONFIGURATION",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    ),
-                    color = Color.White
-                )
-                Text(
-                    text = "BUZZER",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Light,
-                        letterSpacing = 1.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-            }
-
-            // Affichage de la fréquence - grand et central
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.1f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "${frequency.roundToInt()}",
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 64.sp
-                            ),
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Hz",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Light
-                            ),
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
+            item {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.VolumeUp,
+                        contentDescription = "Buzzer",
+                        tint = Color.White,
+                        modifier = Modifier.size(80.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "CONFIGURATION",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp
+                        ),
+                        color = Color.White
+                    )
+                    Text(
+                        "BUZZER",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Light,
+                            letterSpacing = 1.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
                 }
             }
 
-            // Slider personnalisé
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "Ajustez la fréquence",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-
+            item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
-                    )
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
                 ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Slider(
-                            value = frequency,
-                            onValueChange = { frequency = it },
-                            valueRange = 200f..5000f,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = SliderDefaults.colors(
-                                thumbColor = Color.White,
-                                activeTrackColor = Color.White,
-                                inactiveTrackColor = Color.White.copy(alpha = 0.3f)
-                            )
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                "200 Hz",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.7f)
+                                "${frequency.roundToInt()}",
+                                style = MaterialTheme.typography.displayLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 64.sp
+                                ),
+                                color = Color.White
                             )
                             Text(
-                                "5000 Hz",
-                                style = MaterialTheme.typography.bodyMedium,
+                                "Hz",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Light
+                                ),
                                 color = Color.White.copy(alpha = 0.7f)
                             )
                         }
@@ -192,76 +124,106 @@ fun BuzzerSoundScreen(
                 }
             }
 
-            // Bouton d'action stylisé
-            Button(
-                onClick = {
-                    viewModel.updateBuzzerFrequency(frequency.roundToInt())
-                },
-                enabled = !uiState.isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .clip(RoundedCornerShape(30.dp)),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF1A1A2E)
-                )
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        color = Color(0xFF1A1A2E),
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        "APPLIQUER LA FRÉQUENCE",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
+                        "Ajustez la fréquence",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White.copy(alpha = 0.8f)
                     )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Slider(
+                                value = frequency,
+                                onValueChange = { frequency = it },
+                                valueRange = 200f..5000f,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = Color.White,
+                                    activeTrackColor = Color.White,
+                                    inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                                )
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("200 Hz", color = Color.White.copy(alpha = 0.7f))
+                                Text("5000 Hz", color = Color.White.copy(alpha = 0.7f))
+                            }
+                        }
+                    }
                 }
             }
 
-            // Messages d'état
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                uiState.successMessage?.let { message ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Green.copy(alpha = 0.2f)
+            item {
+                Button(
+                    onClick = { viewModel.updateBuzzerFrequency(frequency.roundToInt()) },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clip(RoundedCornerShape(30.dp)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFF1A1A2E)
+                    )
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            color = Color(0xFF1A1A2E),
+                            modifier = Modifier.size(24.dp)
                         )
-                    ) {
+                    } else {
                         Text(
-                            text = message,
-                            color = Color.Green,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(16.dp)
+                            "APPLIQUER LA FRÉQUENCE",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            )
                         )
                     }
                 }
+            }
 
-                uiState.errorMessage?.let { message ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Red.copy(alpha = 0.2f)
-                        )
-                    ) {
-                        Text(
-                            text = message,
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            modifier = Modifier.padding(16.dp)
-                        )
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    uiState.successMessage?.let { message ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Green.copy(alpha = 0.2f))
+                        ) {
+                            Text(
+                                message,
+                                color = Color.Green,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    uiState.errorMessage?.let { message ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.Red.copy(alpha = 0.2f))
+                        ) {
+                            Text(
+                                message,
+                                color = Color.Red,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                     }
                 }
             }

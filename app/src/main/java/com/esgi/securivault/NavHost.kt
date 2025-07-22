@@ -29,10 +29,9 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable(route = HomeScreen.route) {
-            HomeScreen(
-
-            )
+            HomeScreen(navController = navController)
         }
+
         composable(route = DigicodeScreen.route) {
             DigicodeViewScreen(
             )

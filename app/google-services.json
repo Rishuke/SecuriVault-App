@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1085388833545-pl3hl7p76jme2bfj0k1eqi982lfug42e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.esgi.securivault",
+            "certificate_hash": "380fc2be78c0f3d9802e3d9d0cccd149375f23b0"
+          }
+        },
+        {
           "client_id": "1085388833545-r1vt66v1lhd9m653jfi8859cli01iabu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
