@@ -101,6 +101,7 @@ dependencies {
     // Hilt
     implementation(libs.dagger.hilt.android)
     implementation(libs.androidx.animation.core.lint)
+    implementation(libs.firebase.firestore.ktx)
     kapt(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 

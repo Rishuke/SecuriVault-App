@@ -30,6 +30,13 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.esgi.securivault.screens.authent.LoginScreen
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.MetadataChanges
+import kotlinx.coroutines.delay
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,35 +47,296 @@ fun HomeScreen(
     val context = LocalContext.current
     val activity = context as? Activity
 
+    // États pour les alertes et données
+    var showMovementAlert by remember { mutableStateOf(false) }
+    var currentSpeed by remember { mutableDoubleStateOf(0.0) }
+    var isConnected by remember { mutableStateOf(false) }
+    var batteryLevel by remember { mutableStateOf("--") }
+    var securityStatus by remember { mutableStateOf("Connexion en cours...") }
+    var lastUpdateTime by remember { mutableStateOf("Jamais") }
+    var firestoreError by remember { mutableStateOf<String?>(null) }
+    var gpsLatitude by remember { mutableDoubleStateOf(0.0) }
+    var gpsLongitude by remember { mutableDoubleStateOf(0.0) }
+    var gpsSpeed by remember { mutableDoubleStateOf(0.0) }
+
+    // Debug states
+    var debugInfo by remember { mutableStateOf("Initialisation...") }
+    var rawSpeedValue by remember { mutableStateOf<Any?>(null) }
+
+    // Configuration Firestore
+    val db = FirebaseFirestore.getInstance()
+    val suitcaseRef = db.collection("suitcases").document("valise002")
+
+    // Fonction pour parser la vitesse de manière robuste
+    fun parseSpeedValue(speedValue: Any?): Double {
+        return when (speedValue) {
+            is Double -> {
+                Log.d("SpeedParser", "Speed as Double: $speedValue")
+                speedValue
+            }
+            is Float -> {
+                Log.d("SpeedParser", "Speed as Float: $speedValue")
+                speedValue.toDouble()
+            }
+            is Long -> {
+                Log.d("SpeedParser", "Speed as Long: $speedValue")
+                speedValue.toDouble()
+            }
+            is Int -> {
+                Log.d("SpeedParser", "Speed as Int: $speedValue")
+                speedValue.toDouble()
+            }
+            is String -> {
+                Log.d("SpeedParser", "Speed as String: '$speedValue'")
+                speedValue.toDoubleOrNull() ?: run {
+                    Log.w("SpeedParser", "Cannot convert string '$speedValue' to Double")
+                    0.0
+                }
+            }
+            null -> {
+                Log.w("SpeedParser", "Speed value is null")
+                0.0
+            }
+            else -> {
+                Log.w("SpeedParser", "Unknown speed type: ${speedValue.javaClass.simpleName}, value: $speedValue")
+                try {
+                    speedValue.toString().toDoubleOrNull() ?: 0.0
+                } catch (e: Exception) {
+                    Log.e("SpeedParser", "Failed to convert speed: $speedValue", e)
+                    0.0
+                }
+            }
+        }
+    }
+
+    // Listener Firestore avec gestion d'erreurs améliorée
+    DisposableEffect(Unit) {
+        Log.d("FirestoreListener", "Configuration du listener pour document: valise002")
+        debugInfo = "Configuration du listener Firestore..."
+
+        val listener = suitcaseRef.addSnapshotListener(MetadataChanges.INCLUDE) { snapshot, error ->
+            Log.d("FirestoreListener", "Snapshot listener déclenché")
+
+            if (error != null) {
+                Log.e("FirestoreListener", "Erreur du listener", error)
+                firestoreError = "Erreur: ${error.message}"
+                isConnected = false
+                securityStatus = "Erreur de connexion"
+                debugInfo = "Erreur Firestore: ${error.localizedMessage}"
+                return@addSnapshotListener
+            }
+
+            snapshot?.let { doc ->
+                Log.d("FirestoreListener", "Document existe: ${doc.exists()}")
+                Log.d("FirestoreListener", "Source: ${doc.metadata.isFromCache}")
+
+                if (doc.exists()) {
+                    val data = doc.data
+                    Log.d("FirestoreListener", "Données document: $data")
+
+                    data?.let { docData ->
+                        // Affichage debug de toutes les données
+                        Log.d("FirestoreData", "Clés disponibles: ${docData.keys}")
+                        docData.forEach { (key, value) ->
+                            Log.d("FirestoreData", "  $key: $value (${value?.javaClass?.simpleName})")
+                        }
+
+                        // Parse de la vitesse avec fonction robuste
+                        rawSpeedValue = docData["speed"]
+                        val speed = parseSpeedValue(rawSpeedValue)
+
+                        Log.d("SpeedUpdate", "Vitesse brute: $rawSpeedValue")
+                        Log.d("SpeedUpdate", "Vitesse parsée: $speed")
+
+                        currentSpeed = speed
+
+                        // Gestion des alertes de mouvement
+                        val movementThreshold = 1.15
+                        if (speed >= movementThreshold && !showMovementAlert) {
+                            Log.d("MovementAlert", "Mouvement détecté! Vitesse: $speed")
+                            showMovementAlert = true
+                        }
+
+                        // Mise à jour des statuts
+                        isConnected = true
+                        securityStatus = if (speed >= movementThreshold) {
+                            "⚠️ Mouvement détecté!"
+                        } else {
+                            "✅ Sécurisé"
+                        }
+
+                        // Mise à jour du timestamp
+                        lastUpdateTime = java.text.SimpleDateFormat(
+                            "HH:mm:ss",
+                            java.util.Locale.getDefault()
+                        ).format(java.util.Date())
+
+                        // Mise à jour du niveau de batterie
+                        docData["battery"]?.let { battery ->
+                            batteryLevel = when (battery) {
+                                is Number -> "${battery.toInt()}%"
+                                is String -> battery
+                                else -> battery.toString()
+                            }
+                        }
+
+                        // Données GPS
+                        docData["latitude"]?.let { lat ->
+                            gpsLatitude = parseSpeedValue(lat)
+                        }
+                        docData["longitude"]?.let { lng ->
+                            gpsLongitude = parseSpeedValue(lng)
+                        }
+                        docData["speed_gps"]?.let { gpsSpd ->
+                            gpsSpeed = parseSpeedValue(gpsSpd)
+                        }
+
+                        // Mise à jour des infos debug
+                        debugInfo = buildString {
+                            append("MAJ: $lastUpdateTime")
+                            append(" | Vitesse: ${String.format("%.3f", speed)} G")
+                            append(" | Type: ${rawSpeedValue?.javaClass?.simpleName ?: "null"}")
+                            append(" | GPS: ${String.format("%.6f", gpsLatitude)}, ${String.format("%.6f", gpsLongitude)}")
+                        }
+
+                        firestoreError = null
+                        Log.d("FirestoreListener", "Interface mise à jour avec succès")
+
+                    } ?: run {
+                        Log.w("FirestoreListener", "Données du document nulles")
+                        debugInfo = "Document existe mais données nulles"
+                        securityStatus = "Données indisponibles"
+                    }
+                } else {
+                    Log.w("FirestoreListener", "Le document n'existe pas")
+                    debugInfo = "Document 'valise002' introuvable"
+                    isConnected = false
+                    securityStatus = "Document introuvable"
+                }
+            } ?: run {
+                Log.w("FirestoreListener", "Snapshot null reçu")
+                debugInfo = "Snapshot null reçu"
+            }
+        }
+
+        onDispose {
+            Log.d("FirestoreListener", "Suppression du listener")
+            listener.remove()
+        }
+    }
+
+    // Auto-dismiss de l'alerte après 5 secondes
+    LaunchedEffect(showMovementAlert) {
+        if (showMovementAlert) {
+            delay(5000)
+            showMovementAlert = false
+        }
+    }
+
+    // Gestion du bouton retour
     BackHandler {
-        Log.d("BackHandler", "Back pressed on HomeScreen — Navigate to Login")
+        Log.d("Navigation", "Bouton retour pressé - Navigation vers login")
         navController.navigate("login") {
             popUpTo(0) { inclusive = true }
         }
     }
 
-
-
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("", color = Color.White, fontSize = 16.sp) },
+                title = {
+                    Text(
+                        "SecuriVault",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Retour",
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
+                },
+                actions = {
+                    // Indicateur de connexion
+                    Icon(
+                        imageVector = if (isConnected) Icons.Default.CloudDone else Icons.Default.CloudOff,
+                        contentDescription = if (isConnected) "Connecté" else "Déconnecté",
+                        tint = if (isConnected) Color(0xFF4CAF50) else Color(0xFFFF5722),
+                        modifier = Modifier.size(20.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 modifier = Modifier.height(68.dp)
             )
         },
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        snackbarHost = {
+            // Alerte de mouvement personnalisée
+            if (showMovementAlert) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFF5722).copy(alpha = 0.95f)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Alerte",
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "🚨 MOUVEMENT DÉTECTÉ !",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Accélération: ${String.format("%.2f", currentSpeed)} G",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.9f)
+                            )
+                            Text(
+                                text = "Heure: $lastUpdateTime",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { showMovementAlert = false }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Fermer",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
     ) { innerPadding ->
         Box(
             modifier = modifier
@@ -81,29 +349,156 @@ fun HomeScreen(
                             Color(0xFF1B263B),
                             Color(0xFF415A77)
                         ),
-                        radius = 1200f
+                        radius = 1400f
                     )
                 )
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(40.dp),
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item { WelcomeSection() }
-                item { Spacer(Modifier.height(60.dp)) }
-                item { SafeVaultDisplay() }
-                item { Spacer(Modifier.height(40.dp)) }
-                item { StatusSection() }
-                item { Spacer(Modifier.height(40.dp)) }
+                item { Spacer(Modifier.height(20.dp)) }
+                item { SafeVaultDisplay(currentSpeed) }
+                item { Spacer(Modifier.height(16.dp)) }
+                item { StatusSection(isConnected, batteryLevel, securityStatus, lastUpdateTime) }
+                item {
+                    if (gpsLatitude != 0.0 && gpsLongitude != 0.0) {
+                        GpsSection(gpsLatitude, gpsLongitude, gpsSpeed)
+                    }
+                }
+                item { DebugSection(debugInfo, firestoreError, rawSpeedValue, currentSpeed) }
+                item { Spacer(Modifier.height(20.dp)) }
                 item { SecurityFooter() }
             }
         }
     }
 }
 
+@Composable
+private fun GpsSection(latitude: Double, longitude: Double, gpsSpeed: Double) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.08f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "GPS",
+                    tint = Color(0xFF64FFDA),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Position GPS",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color.White
+                )
+            }
+
+            Text(
+                text = "Latitude: ${String.format("%.6f", latitude)}°",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.8f)
+            )
+            Text(
+                text = "Longitude: ${String.format("%.6f", longitude)}°",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.8f)
+            )
+            if (gpsSpeed > 0) {
+                Text(
+                    text = "Vitesse GPS: ${String.format("%.2f", gpsSpeed)} m/s",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF64FFDA)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DebugSection(
+    debugInfo: String,
+    firestoreError: String?,
+    rawSpeedValue: Any?,
+    currentSpeed: Double
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Black.copy(alpha = 0.4f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BugReport,
+                    contentDescription = "Debug",
+                    tint = Color(0xFF64FFDA),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Informations Debug",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color(0xFF64FFDA)
+                )
+            }
+
+            Text(
+                text = debugInfo,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.8f),
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+
+            Text(
+                text = "Valeur brute: $rawSpeedValue",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+
+            Text(
+                text = "Vitesse finale: ${String.format("%.6f", currentSpeed)} G",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (currentSpeed >= 1.15) Color(0xFFFF5722) else Color(0xFF4CAF50),
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+
+            if (firestoreError != null) {
+                Text(
+                    text = "❌ $firestoreError",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFFFF5722)
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun WelcomeSection() {
@@ -114,39 +509,49 @@ private fun WelcomeSection() {
             text = "SecuriVault",
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.Bold,
-                fontSize = 42.sp
+                fontSize = 40.sp
             ),
             color = Color(0xFF64FFDA),
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "Votre coffre-fort numérique",
+            text = "Système de sécurité intelligent",
             style = MaterialTheme.typography.titleMedium,
             color = Color.White.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
 
 @Composable
-private fun SafeVaultDisplay() {
+private fun SafeVaultDisplay(currentSpeed: Double) {
     Box(
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.padding(vertical = 20.dp)
     ) {
+        val isShaking = currentSpeed >= 1.15
+        val mainColor = if (isShaking) Color(0xFFFF5722) else Color(0xFF64FFDA)
+        val secondaryColor = if (isShaking) Color(0xFF8B0000) else Color(0xFF1E3A5F)
+
         // Cercle externe avec effet de lueur
         Box(
             modifier = Modifier
-                .size(280.dp)
+                .size(300.dp)
                 .shadow(
-                    elevation = 20.dp,
+                    elevation = if (isShaking) 35.dp else 25.dp,
                     shape = CircleShape,
-                    ambientColor = Color(0xFF64FFDA),
-                    spotColor = Color(0xFF64FFDA)
+                    ambientColor = mainColor,
+                    spotColor = mainColor
                 )
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(
+                        colors = if (isShaking) listOf(
+                            Color(0xFF5F1E1E),
+                            Color(0xFF6B2D2D),
+                            Color(0xFF470F0F)
+                        ) else listOf(
                             Color(0xFF1E3A5F),
                             Color(0xFF2D4A6B),
                             Color(0xFF0F2C47)
@@ -159,7 +564,7 @@ private fun SafeVaultDisplay() {
         // Cercle interne du coffre
         Box(
             modifier = Modifier
-                .size(220.dp)
+                .size(240.dp)
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
@@ -175,7 +580,7 @@ private fun SafeVaultDisplay() {
             Box(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(80.dp)
+                    .size(90.dp)
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
@@ -189,42 +594,69 @@ private fun SafeVaultDisplay() {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Lock,
+                    imageVector = if (isShaking) Icons.Default.LockOpen else Icons.Default.Lock,
                     contentDescription = "Cadenas",
-                    modifier = Modifier.size(32.dp),
-                    tint = Color(0xFF64FFDA)
+                    modifier = Modifier.size(36.dp),
+                    tint = mainColor
                 )
             }
 
-            // Indicateurs autour du coffre
-            repeat(8) { index ->
-                val angle = (360f / 8) * index
-                val isActive = index < 3 // Simule des indicateurs actifs
+            // Indicateurs animés autour du coffre
+            repeat(12) { index ->
+                val angle = (360f / 12) * index
+                val isActive = if (isShaking) (index < 8) else (index < 4)
+                val size = if (isShaking) 14.dp else 10.dp
 
                 Box(
                     modifier = Modifier
                         .offset(
-                            x = (95 * kotlin.math.cos(Math.toRadians(angle.toDouble()))).dp,
-                            y = (95 * kotlin.math.sin(Math.toRadians(angle.toDouble()))).dp
+                            x = (105 * kotlin.math.cos(Math.toRadians(angle.toDouble()))).dp,
+                            y = (105 * kotlin.math.sin(Math.toRadians(angle.toDouble()))).dp
                         )
                         .align(Alignment.Center)
-                        .size(8.dp)
+                        .size(size)
                         .background(
-                            color = if (isActive) Color(0xFF64FFDA) else Color.White.copy(alpha = 0.3f),
+                            color = if (isActive) mainColor else Color.White.copy(alpha = 0.3f),
                             shape = CircleShape
                         )
                 )
             }
         }
+
+        // Affichage des données sous le coffre
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "${String.format("%.3f", currentSpeed)} G",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = mainColor
+            )
+            Text(
+                text = "Accélération",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+        }
     }
 }
 
 @Composable
-private fun StatusSection() {
+private fun StatusSection(
+    isConnected: Boolean,
+    batteryLevel: String,
+    securityStatus: String,
+    lastUpdateTime: String
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.05f)
+            containerColor = Color.White.copy(alpha = 0.06f)
         ),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -237,34 +669,45 @@ private fun StatusSection() {
                     fontWeight = FontWeight.SemiBold
                 ),
                 color = Color.White,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 20.dp)
             )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatusIndicator(
                     icon = Icons.Default.Security,
                     label = "Sécurité",
-                    status = "Active",
-                    color = Color(0xFF4CAF50)
+                    status = securityStatus,
+                    color = if (securityStatus.contains("Mouvement") || securityStatus.contains("⚠️"))
+                        Color(0xFFFF5722) else Color(0xFF4CAF50)
                 )
 
                 StatusIndicator(
-                    icon = Icons.Default.Bluetooth,
+                    icon = Icons.Default.Wifi,
                     label = "Connexion",
-                    status = "Connecté",
-                    color = Color(0xFF2196F3)
+                    status = if (isConnected) "Connecté" else "Déconnecté",
+                    color = if (isConnected) Color(0xFF2196F3) else Color(0xFFFF5722)
                 )
 
                 StatusIndicator(
                     icon = Icons.Default.Battery6Bar,
                     label = "Batterie",
-                    status = "90%",
+                    status = batteryLevel,
                     color = Color(0xFF64FFDA)
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Dernière mise à jour: $lastUpdateTime",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -281,7 +724,7 @@ private fun StatusIndicator(
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(52.dp)
                 .background(
                     color = color.copy(alpha = 0.2f),
                     shape = CircleShape
@@ -291,7 +734,7 @@ private fun StatusIndicator(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(26.dp),
                 tint = color
             )
         }
@@ -311,7 +754,8 @@ private fun StatusIndicator(
                 fontWeight = FontWeight.SemiBold
             ),
             color = color,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 2
         )
     }
 }
@@ -326,14 +770,14 @@ private fun SecurityFooter() {
         Icon(
             imageVector = Icons.Default.Shield,
             contentDescription = "Sécurisé",
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(18.dp),
             tint = Color(0xFF64FFDA)
         )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = "Chiffrement AES-256 • Sécurisé et Protégé",
+            text = "Chiffrement AES-256 • Sécurisé par Firebase",
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.6f)
         )
