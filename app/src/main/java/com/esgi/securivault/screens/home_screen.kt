@@ -2,45 +2,41 @@ package com.esgi.securivault.screens
 import androidx.compose.ui.res.stringResource
 import com.esgi.securivault.R
 
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.esgi.securivault.screens.authent.LoginScreen
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.MetadataChanges
 import kotlinx.coroutines.delay
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.esgi.securivault.composables.home.SafeVaultDisplay
+import com.esgi.securivault.composables.home.SecurityFooter
+import com.esgi.securivault.composables.home.StatusSection
+import com.esgi.securivault.composables.home.WelcomeSection
 
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -58,14 +54,7 @@ fun HomeScreen(
     var batteryLevel by remember { mutableStateOf("--") }
     var securityStatus by remember { mutableStateOf("Connexion en cours...") }
     var lastUpdateTime by remember { mutableStateOf("Jamais") }
-    var firestoreError by remember { mutableStateOf<String?>(null) }
-    var gpsLatitude by remember { mutableDoubleStateOf(0.0) }
-    var gpsLongitude by remember { mutableDoubleStateOf(0.0) }
-    var gpsSpeed by remember { mutableDoubleStateOf(0.0) }
 
-    // Debug states
-    var debugInfo by remember { mutableStateOf("Initialisation...") }
-    var rawSpeedValue by remember { mutableStateOf<Any?>(null) }
 
     // Configuration Firestore
     val db = FirebaseFirestore.getInstance()
@@ -73,90 +62,43 @@ fun HomeScreen(
 
     fun parseSpeedValue(speedValue: Any?): Double {
         return when (speedValue) {
-            is Double -> {
-                Log.d("SpeedParser", "Speed as Double: $speedValue")
-                speedValue
-            }
-            is Float -> {
-                Log.d("SpeedParser", "Speed as Float: $speedValue")
-                speedValue.toDouble()
-            }
-            is Long -> {
-                Log.d("SpeedParser", "Speed as Long: $speedValue")
-                speedValue.toDouble()
-            }
-            is Int -> {
-                Log.d("SpeedParser", "Speed as Int: $speedValue")
-                speedValue.toDouble()
-            }
-            is String -> {
-                Log.d("SpeedParser", "Speed as String: '$speedValue'")
-                speedValue.toDoubleOrNull() ?: run {
-                    Log.w("SpeedParser", "Cannot convert string '$speedValue' to Double")
-                    0.0
-                }
-            }
-            null -> {
-                Log.w("SpeedParser", "Speed value is null")
-                0.0
-            }
+            is Double -> speedValue
+            is Float -> speedValue.toDouble()
+            is Long -> speedValue.toDouble()
+            is Int -> speedValue.toDouble()
+            is String -> speedValue.toDoubleOrNull() ?: 0.0
+            null -> 0.0
             else -> {
-                Log.w("SpeedParser", "Unknown speed type: ${speedValue.javaClass.simpleName}, value: $speedValue")
                 try {
                     speedValue.toString().toDoubleOrNull() ?: 0.0
                 } catch (e: Exception) {
-                    Log.e("SpeedParser", "Failed to convert speed: $speedValue", e)
                     0.0
                 }
             }
         }
     }
 
-    // Listener Firestore avec gestion d'erreurs améliorée
+    // Listener Firestore
     DisposableEffect(Unit) {
-        Log.d("FirestoreListener", "Configuration du listener pour document: valise002")
-        debugInfo = "Configuration du listener Firestore..."
-
         val listener = suitcaseRef.addSnapshotListener(MetadataChanges.INCLUDE) { snapshot, error ->
-            Log.d("FirestoreListener", "Snapshot listener déclenché")
-
             if (error != null) {
                 Log.e("FirestoreListener", "Erreur du listener", error)
-                firestoreError = "Erreur: ${error.message}"
                 isConnected = false
                 securityStatus = "Erreur de connexion"
-                debugInfo = "Erreur Firestore: ${error.localizedMessage}"
                 return@addSnapshotListener
             }
 
             snapshot?.let { doc ->
-                Log.d("FirestoreListener", "Document existe: ${doc.exists()}")
-                Log.d("FirestoreListener", "Source: ${doc.metadata.isFromCache}")
-
                 if (doc.exists()) {
                     val data = doc.data
-                    Log.d("FirestoreListener", "Données document: $data")
-
                     data?.let { docData ->
-                        // Affichage debug de toutes les données
-                        Log.d("FirestoreData", "Clés disponibles: ${docData.keys}")
-                        docData.forEach { (key, value) ->
-                            Log.d("FirestoreData", "  $key: $value (${value?.javaClass?.simpleName})")
-                        }
-
-                        // Parse de la vitesse avec fonction robuste
-                        rawSpeedValue = docData["speed"]
-                        val speed = parseSpeedValue(rawSpeedValue)
-
-                        Log.d("SpeedUpdate", "Vitesse brute: $rawSpeedValue")
-                        Log.d("SpeedUpdate", "Vitesse parsée: $speed")
-
+                        // Parse de la vitesse
+                        val speed = parseSpeedValue(docData["speed"])
                         currentSpeed = speed
 
                         // Gestion des alertes de mouvement
                         val movementThreshold = 1.15
                         if (speed >= movementThreshold && !showMovementAlert) {
-                            Log.d("MovementAlert", "Mouvement détecté! Vitesse: $speed")
                             showMovementAlert = true
                         }
 
@@ -184,47 +126,16 @@ fun HomeScreen(
                             }
                         }
 
-                        // Données GPS
-                        docData["latitude"]?.let { lat ->
-                            gpsLatitude = parseSpeedValue(lat)
-                        }
-                        docData["longitude"]?.let { lng ->
-                            gpsLongitude = parseSpeedValue(lng)
-                        }
-                        docData["speed_gps"]?.let { gpsSpd ->
-                            gpsSpeed = parseSpeedValue(gpsSpd)
-                        }
 
-                        // Mise à jour des infos debug
-                        debugInfo = buildString {
-                            append("MAJ: $lastUpdateTime")
-                            append(" | Vitesse: ${String.format("%.3f", speed)} G")
-                            append(" | Type: ${rawSpeedValue?.javaClass?.simpleName ?: "null"}")
-                            append(" | GPS: ${String.format("%.6f", gpsLatitude)}, ${String.format("%.6f", gpsLongitude)}")
-                        }
-
-                        firestoreError = null
-                        Log.d("FirestoreListener", "Interface mise à jour avec succès")
-
-                    } ?: run {
-                        Log.w("FirestoreListener", "Données du document nulles")
-                        debugInfo = "Document existe mais données nulles"
-                        securityStatus = "Données indisponibles"
                     }
                 } else {
-                    Log.w("FirestoreListener", "Le document n'existe pas")
-                    debugInfo = "Document 'valise002' introuvable"
                     isConnected = false
                     securityStatus = "Document introuvable"
                 }
-            } ?: run {
-                Log.w("FirestoreListener", "Snapshot null reçu")
-                debugInfo = "Snapshot null reçu"
             }
         }
 
         onDispose {
-            Log.d("FirestoreListener", "Suppression du listener")
             listener.remove()
         }
     }
@@ -239,7 +150,6 @@ fun HomeScreen(
 
     // Gestion du bouton retour
     BackHandler {
-        Log.d("Navigation", "Bouton retour pressé - Navigation vers login")
         navController.navigate("login") {
             popUpTo(0) { inclusive = true }
         }
@@ -255,6 +165,14 @@ fun HomeScreen(
                     },
                 navigationIcon = {
 
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Retour",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 },
                 actions = {
                     // Indicateur de connexion
@@ -388,12 +306,8 @@ fun HomeScreen(
                 item { SafeVaultDisplay(currentSpeed) }
                 item { Spacer(Modifier.height(16.dp)) }
                 item { StatusSection(isConnected, batteryLevel, securityStatus, lastUpdateTime) }
-                item {
-                    if (gpsLatitude != 0.0 && gpsLongitude != 0.0) {
-                        GpsSection(gpsLatitude, gpsLongitude, gpsSpeed)
-                    }
-                }
-                item { DebugSection(debugInfo, firestoreError, rawSpeedValue, currentSpeed) }
+
+
                 item { Spacer(Modifier.height(20.dp)) }
                 item { SecurityFooter() }
             }
@@ -763,24 +677,7 @@ private fun StatusIndicator(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
 
-        Text(
-            text = status,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = color,
-            textAlign = TextAlign.Center,
-            maxLines = 2
-        )
-    }
-}
 
 @Composable
 private fun SecurityFooter() {

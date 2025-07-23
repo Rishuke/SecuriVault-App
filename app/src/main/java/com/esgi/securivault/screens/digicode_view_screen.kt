@@ -3,16 +3,10 @@ package com.esgi.securivault.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -23,10 +17,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.esgi.securivault.composables.digicode.CodeChangeSection
 import com.esgi.securivault.R
 import com.esgi.securivault.viewmodels.SuitcaseViewModel
+import com.esgi.securivault.composables.digicode.CodeHeader
+import com.esgi.securivault.composables.digicode.CodeViewSection
+import com.esgi.securivault.composables.digicode.ModeSelector
+import com.esgi.securivault.composables.digicode.StatusMessages
 
 @Composable
 fun DigicodeViewScreen(
