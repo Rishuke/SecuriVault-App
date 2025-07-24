@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">SecuriVault</string>
+    <string name="default_web_client_id">1085388833545-r1vt66v1lhd9m653jfi8859cli01iabu.apps.googleusercontent.com</string>
+    <string name="welcome_title">SecuriVault</string>
+    <string name="welcome_subtitle">Smart security system</string>
+    <string name="motion_alert_title">MOTION DETECTED!</string>
+    <string name="status_secure">Secured</string>
+    <string name="motion_alert_acceleration">Acceleration: %1$s G</string>
+    <string name="motion_alert_time">Time: %1$s</string>
+    <string name="gps_section_title">GPS Position</string>
+    <string name="gps_latitude">Latitude: %1$s°</string>
+    <string name="gps_longitude">Longitude: %1$s°</string>
+    <string name="gps_speed">GPS Speed: %1$s m/s</string>
+    <string name="debug_section_title">Debug Information</string>
+    <string name="debug_raw_value">Raw value: %1$s</string>
+    <string name="debug_final_speed">Final speed: %1$s G</string>
+    <string name="system_status">System Status</string>
+    <string name="label_security">Security</string>
+    <string name="label_connection">Connection</string>
+    <string name="label_battery">Battery</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="last_update">Last update: %1$s</string>
+    <string name="footer_secure">AES-256 encryption • Secured by Firebase</string>
+
+
+</resources>

@@ -1,4 +1,6 @@
 package com.esgi.securivault.screens
+import androidx.compose.ui.res.stringResource
+import com.esgi.securivault.R
 
 import android.app.Activity
 import android.util.Log
@@ -21,6 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,7 +70,6 @@ fun HomeScreen(
     val db = FirebaseFirestore.getInstance()
     val suitcaseRef = db.collection("suitcases").document("valise002")
 
-    // Fonction pour parser la vitesse de manière robuste
     fun parseSpeedValue(speedValue: Any?): Double {
         return when (speedValue) {
             is Double -> {
@@ -160,9 +162,10 @@ fun HomeScreen(
                         // Mise à jour des statuts
                         isConnected = true
                         securityStatus = if (speed >= movementThreshold) {
-                            "⚠️ Mouvement détecté!"
+                            context.getString(R.string.motion_alert_title)
                         } else {
-                            "✅ Sécurisé"
+                            context.getString(R.string.status_secure)
+
                         }
 
                         // Mise à jour du timestamp
@@ -245,22 +248,10 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "SecuriVault",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
+
+                    },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Retour",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+
                 },
                 actions = {
                     // Indicateur de connexion
@@ -305,19 +296,22 @@ fun HomeScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "🚨 MOUVEMENT DÉTECTÉ !",
+                                stringResource(R.string.motion_alert_title),
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold
                                 ),
                                 color = Color.White
                             )
                             Text(
-                                text = "Accélération: ${String.format("%.2f", currentSpeed)} G",
+                                text = stringResource(
+                                    R.string.motion_alert_acceleration,
+                                    String.format("%.3f", currentSpeed)
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.9f)
                             )
                             Text(
-                                text = "Heure: $lastUpdateTime",
+                                text = stringResource(R.string.motion_alert_time, lastUpdateTime),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.White.copy(alpha = 0.7f)
                             )
@@ -402,7 +396,7 @@ private fun GpsSection(latitude: Double, longitude: Double, gpsSpeed: Double) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Position GPS",
+                    text = stringResource(R.string.gps_section_title),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
@@ -411,18 +405,18 @@ private fun GpsSection(latitude: Double, longitude: Double, gpsSpeed: Double) {
             }
 
             Text(
-                text = "Latitude: ${String.format("%.6f", latitude)}°",
+                text = stringResource(R.string.gps_latitude, String.format("%.6f", latitude)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.8f)
             )
             Text(
-                text = "Longitude: ${String.format("%.6f", longitude)}°",
+                text = stringResource(R.string.gps_longitude, String.format("%.6f", longitude)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.8f)
             )
             if (gpsSpeed > 0) {
                 Text(
-                    text = "Vitesse GPS: ${String.format("%.2f", gpsSpeed)} m/s",
+                    text = stringResource(R.string.gps_speed, String.format("%.2f", gpsSpeed)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF64FFDA)
                 )
@@ -460,7 +454,7 @@ private fun DebugSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Informations Debug",
+                    text = stringResource(R.string.debug_section_title),
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.SemiBold
                     ),
@@ -476,14 +470,14 @@ private fun DebugSection(
             )
 
             Text(
-                text = "Valeur brute: $rawSpeedValue",
+                text = stringResource(R.string.debug_raw_value, rawSpeedValue.toString()),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = 4.dp)
             )
 
             Text(
-                text = "Vitesse finale: ${String.format("%.6f", currentSpeed)} G",
+                text = stringResource(R.string.debug_final_speed, String.format("%.3f", currentSpeed)),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (currentSpeed >= 1.15) Color(0xFFFF5722) else Color(0xFF4CAF50),
                 modifier = Modifier.padding(bottom = 4.dp)
@@ -491,7 +485,7 @@ private fun DebugSection(
 
             if (firestoreError != null) {
                 Text(
-                    text = "❌ $firestoreError",
+                    text = "$firestoreError",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFFFF5722)
                 )
@@ -506,7 +500,7 @@ private fun WelcomeSection() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "SecuriVault",
+            text = stringResource(R.string.welcome_title),
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 40.sp
@@ -516,7 +510,7 @@ private fun WelcomeSection() {
         )
 
         Text(
-            text = "Système de sécurité intelligent",
+            text = stringResource(R.string.welcome_subtitle),
             style = MaterialTheme.typography.titleMedium,
             color = Color.White.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
@@ -535,7 +529,6 @@ private fun SafeVaultDisplay(currentSpeed: Double) {
         val mainColor = if (isShaking) Color(0xFFFF5722) else Color(0xFF64FFDA)
         val secondaryColor = if (isShaking) Color(0xFF8B0000) else Color(0xFF1E3A5F)
 
-        // Cercle externe avec effet de lueur
         Box(
             modifier = Modifier
                 .size(300.dp)
@@ -664,7 +657,7 @@ private fun StatusSection(
             modifier = Modifier.padding(24.dp)
         ) {
             Text(
-                text = "État du Système",
+                text = stringResource(R.string.system_status),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -678,7 +671,7 @@ private fun StatusSection(
             ) {
                 StatusIndicator(
                     icon = Icons.Default.Security,
-                    label = "Sécurité",
+                    label = stringResource(R.string.label_security),
                     status = securityStatus,
                     color = if (securityStatus.contains("Mouvement") || securityStatus.contains("⚠️"))
                         Color(0xFFFF5722) else Color(0xFF4CAF50)
@@ -686,14 +679,14 @@ private fun StatusSection(
 
                 StatusIndicator(
                     icon = Icons.Default.Wifi,
-                    label = "Connexion",
-                    status = if (isConnected) "Connecté" else "Déconnecté",
+                    label = stringResource(R.string.label_connection),
+                    status = if (isConnected) stringResource(R.string.status_connected) else stringResource(R.string.status_disconnected),
                     color = if (isConnected) Color(0xFF2196F3) else Color(0xFFFF5722)
                 )
 
                 StatusIndicator(
                     icon = Icons.Default.Battery6Bar,
-                    label = "Batterie",
+                    label = stringResource(R.string.label_battery),
                     status = batteryLevel,
                     color = Color(0xFF64FFDA)
                 )
@@ -702,7 +695,7 @@ private fun StatusSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Dernière mise à jour: $lastUpdateTime",
+                text = stringResource(R.string.last_update, lastUpdateTime),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center,
@@ -777,7 +770,7 @@ private fun SecurityFooter() {
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = "Chiffrement AES-256 • Sécurisé par Firebase",
+            text = stringResource(R.string.footer_secure),
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.6f)
         )
