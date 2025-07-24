@@ -22,5 +22,45 @@
     <string name="status_disconnected">Déconnecté</string>
     <string name="last_update">Dernière mise à jour: %1$s</string>
     <string name="footer_secure">Chiffrement AES-256 • Sécurisé par Firebase</string>
+    <string name="login_title">Connexion à votre valise</string>
+    <string name="login_button">Connexion</string>
+    <string name="login_google_button">Connexion avec Google</string>
+    <string name="create_account">Créer un compte</string>
+    <string name="register_title">Créer un compte</string>
+    <string name="email">Email</string>
+    <string name="password">Mot de passe</string>
+    <string name="confirm_password">Confirmer mot de passe</string>
+    <string name="register_button">S inscrire</string>
+    <string name="already_have_account">Déjà un compte ? Se connecter</string>
+    <string name="error_fields_required">Tous les champs sont requis</string>
+    <string name="error_password_mismatch">Les mots de passe ne correspondent pas</string>
+    <string name="pin_code_title">Code d Accès</string>
+    <string name="manage_your_pin">Gérez votre code de sécurité</string>
+    <string name="view_mode">Consulter</string>
+    <string name="edit_mode">Modifier</string>
+    <string name="current_code">Code Actuel</string>
+    <string name="show_code">Afficher le Code</string>
+    <string name="hide_code">Masquer le Code</string>
+    <string name="new_code">Nouveau Code</string>
+    <string name="new_code_label">Nouveau code (4 chiffres)</string>
+    <string name="confirm_code_label">Confirmer le code</string>
+    <string name="hide">Masquer</string>
+    <string name="show">Afficher</string>
+    <string name="password_mismatch_warning">⚠️ Les codes ne correspondent pas</string>
+    <string name="save_code">Enregistrer le Code</string>
+    <string name="led_icon_description">LED</string>
+    <string name="color">COULEUR</string>
+    <string name="led">LED</string>
+    <string name="choose_color">Choisissez une couleur</string>
+    <string name="apply_color">APPLIQUER LA COULEUR</string>
+    <string name="buzzer_icon_description">Buzzer</string>
+    <string name="configuration">CONFIGURATION</string>
+    <string name="buzzer">BUZZER</string>
+    <string name="hertz">Hz</string>
+    <string name="adjust_frequency">Ajustez la fréquence</string>
+    <string name="apply_frequency">APPLIQUER LA FRÉQUENCE</string>
+    <string name="hz_200">200 Hz</string>
+    <string name="hz_5000">5000 Hz</string>
+
 
 </resources>

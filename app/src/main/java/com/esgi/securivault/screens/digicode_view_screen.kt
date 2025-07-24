@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.esgi.securivault.R
 import com.esgi.securivault.viewmodels.SuitcaseViewModel
 
 @Composable
@@ -140,7 +142,8 @@ private fun CodeHeader() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Code d'Accès",
+            text = stringResource(R.string.pin_code_title),
+
             style = MaterialTheme.typography.displaySmall.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 32.sp
@@ -150,7 +153,8 @@ private fun CodeHeader() {
         )
 
         Text(
-            text = "Gérez votre code de sécurité",
+            text = stringResource(R.string.manage_your_pin),
+
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.8f),
             textAlign = TextAlign.Center
@@ -174,7 +178,8 @@ private fun ModeSelector(
             modifier = Modifier.padding(8.dp)
         ) {
             ModeButton(
-                text = "Consulter",
+                text = stringResource(R.string.view_mode),
+
                 icon = Icons.Default.Visibility,
                 isSelected = isViewMode,
                 onClick = { onModeChange(true) },
@@ -182,7 +187,8 @@ private fun ModeSelector(
             )
 
             ModeButton(
-                text = "Modifier",
+                text = stringResource(R.string.edit_mode),
+
                 icon = Icons.Default.Edit,
                 isSelected = !isViewMode,
                 onClick = { onModeChange(false) },
@@ -242,7 +248,7 @@ private fun CodeViewSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Code Actuel",
+                text = stringResource(R.string.current_code),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -306,7 +312,7 @@ private fun CodeViewSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (showCurrentCode) "Masquer le Code" else "Afficher le Code",
+                    text = if (showCurrentCode) stringResource(R.string.hide_code) else stringResource(R.string.show_code),
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -375,7 +381,7 @@ private fun CodeChangeSection(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Nouveau Code",
+                text = stringResource(R.string.new_code),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -387,14 +393,14 @@ private fun CodeChangeSection(
             OutlinedTextField(
                 value = newCode,
                 onValueChange = onNewCodeChange,
-                label = { Text("Nouveau code (4 chiffres)", color = Color.White.copy(alpha = 0.7f)) },
+                label = {  Text(stringResource(R.string.new_code_label), color = Color.White.copy(alpha = 0.7f)) },
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 trailingIcon = {
                     IconButton(onClick = onToggleVisibility) {
                         Icon(
                             imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (showPassword) "Masquer" else "Afficher",
+                            contentDescription = if (showPassword) stringResource(R.string.hide) else stringResource(R.string.show),
                             tint = Color.White
                         )
                     }
@@ -411,7 +417,7 @@ private fun CodeChangeSection(
             OutlinedTextField(
                 value = confirmCode,
                 onValueChange = onConfirmCodeChange,
-                label = { Text("Confirmer le code", color = Color.White.copy(alpha = 0.7f)) },
+                label = {  Text(stringResource(R.string.confirm_code_label),  color = Color.White.copy(alpha = 0.7f)) },
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(),
@@ -427,7 +433,7 @@ private fun CodeChangeSection(
 
             if (confirmCode.isNotEmpty() && newCode != confirmCode) {
                 Text(
-                    text = "⚠️ Les codes ne correspondent pas",
+                    text = stringResource(R.string.password_mismatch_warning),
                     color = Color.Red,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -461,7 +467,7 @@ private fun CodeChangeSection(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Enregistrer le Code",
+                            text = stringResource(R.string.save_code),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp
                         )

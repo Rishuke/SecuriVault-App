@@ -31,6 +31,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.esgi.securivault.viewmodels.SuitcaseViewModel
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
+import com.esgi.securivault.R
 
 
 @Composable
@@ -96,7 +98,7 @@ fun LedColorScreen(
             item {
                 Icon(
                     imageVector = Icons.Default.Lightbulb,
-                    contentDescription = "LED",
+                    contentDescription = stringResource(R.string.led_icon_description),
                     tint = selectedColorValue,
                     modifier = Modifier.size(80.dp)
                 )
@@ -104,7 +106,7 @@ fun LedColorScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "COULEUR",
+                    text = stringResource(R.string.color),
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
@@ -113,7 +115,7 @@ fun LedColorScreen(
                 )
 
                 Text(
-                    text = "LED",
+                    text = stringResource(R.string.led),
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Light,
                         letterSpacing = 1.sp
@@ -174,7 +176,7 @@ fun LedColorScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Choisissez une couleur",
+                            text = stringResource(R.string.choose_color),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Medium
                             ),
@@ -242,7 +244,7 @@ fun LedColorScreen(
                         )
                     } else {
                         Text(
-                            "APPLIQUER LA COULEUR",
+                            text = stringResource(R.string.apply_color),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp

@@ -13,12 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.esgi.securivault.R
 import com.esgi.securivault.ui.theme.NavigationComposeTheme
 import com.esgi.securivault.viewmodels.LoginViewModel
 @Composable
@@ -32,6 +34,14 @@ fun LoginScreen(
     val password by viewModel.password
     val isLoading by viewModel.isLoading
     val error by viewModel.error
+
+    val appName = stringResource(id = R.string.app_name)
+    val loginTitle = stringResource(id = R.string.login_title)
+    val emailLabel = stringResource(id = R.string.email)
+    val passwordLabel = stringResource(id = R.string.password)
+    val loginButton = stringResource(id = R.string.login_button)
+    val googleLoginButton = stringResource(id = R.string.login_google_button)
+    val registerLink = stringResource(id = R.string.create_account)
 
     Box(
         modifier = Modifier
@@ -49,7 +59,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "SecuriVault",
+                text = appName,
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.White
             )
@@ -65,7 +75,7 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Connexion à votre valise",
+                        text = loginTitle,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = Color(0xFF0D1B2A)
                     )
@@ -73,14 +83,14 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = email,
                         onValueChange = { viewModel.email.value = it },
-                        label = { Text("Email") },
+                        label = { Text(emailLabel) },
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { viewModel.password.value = it },
-                        label = { Text("Mot de passe") },
+                        label = { Text(passwordLabel) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -93,7 +103,7 @@ fun LoginScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A), contentColor = Color.White)
                         ) {
-                            Text("Connexion")
+                            Text(loginButton)
                         }
 
                         OutlinedButton(
@@ -102,12 +112,12 @@ fun LoginScreen(
                         ) {
                             Icon(Icons.Default.Login, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Connexion avec Google")
+                            Text(googleLoginButton)
                         }
                     }
 
                     TextButton(onClick = onNavigateToRegister) {
-                        Text("Créer un compte")
+                        Text(registerLink)
                     }
 
                     error?.let {
@@ -116,6 +126,5 @@ fun LoginScreen(
                 }
             }
         }
-
     }
 }
