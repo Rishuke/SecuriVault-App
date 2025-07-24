@@ -49,6 +49,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
+    var showMenu by remember { mutableStateOf(false) }
 
     // États pour les alertes et données
     var showMovementAlert by remember { mutableStateOf(false) }
@@ -244,6 +245,8 @@ fun HomeScreen(
         }
     }
 
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -261,6 +264,32 @@ fun HomeScreen(
                         tint = if (isConnected) Color(0xFF4CAF50) else Color(0xFFFF5722),
                         modifier = Modifier.size(20.dp)
                     )
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.White
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Se déconnecter") },
+                            onClick = {
+                                FirebaseAuth.getInstance().signOut()
+                                navController.navigate("login") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Logout, contentDescription = "Logout")
+                            }
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 modifier = Modifier.height(68.dp)

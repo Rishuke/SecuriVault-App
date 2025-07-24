@@ -104,7 +104,11 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     kapt(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("io.mockk:mockk:1.13.9")
 
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     // Firebase Auth
     implementation("com.google.firebase:firebase-auth-ktx")
@@ -113,6 +117,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
     implementation (libs.androidx.material.icons.extended)
+    testImplementation("io.mockk:mockk:1.13.9")
 
     implementation (libs.maps.compose)
     implementation (libs.play.services.maps)
@@ -121,6 +126,7 @@ dependencies {
 
     // Pour les requêtes HTTP (si pas déjà présent)
     implementation (libs.kotlinx.coroutines.android)
+    testImplementation(kotlin("test"))
 
 
 }
