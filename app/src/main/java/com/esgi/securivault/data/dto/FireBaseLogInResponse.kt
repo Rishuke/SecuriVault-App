@@ -1,6 +1,6 @@
 package com.esgi.securivault.data.dto
 
-data class LoginResponse(
+data class FireBaseLogInResponse(
     val idToken: String,
     val refreshToken: String,
 )

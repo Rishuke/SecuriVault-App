@@ -1,8 +1,9 @@
 package com.esgi.securivault.repository
 
 import android.util.Log
-import com.esgi.securivault.data.dto.LoginRequest
-import com.esgi.securivault.data.dto.LoginResponse
+
+import com.esgi.securivault.data.dto.FireBaseLogInResponse
+import com.esgi.securivault.data.dto.FirebaseLogInRequest
 import com.esgi.securivault.networking.RetrofitHttpClient
 import com.esgi.securivault.networking.services.LoginServices
 import retrofit2.Call
@@ -15,9 +16,9 @@ class LoginRepository {
         .create(LoginServices::class.java)
 
     fun loginUser(email: String, password: String, callback: (String?) -> Unit) {
-        val request = LoginRequest(email, password)
-        loginServices.loginUsr(request).enqueue(object : Callback<LoginResponse> {
-            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+        val request = FirebaseLogInRequest(email, password)
+        loginServices.loginUsr(request).enqueue(object : Callback<FireBaseLogInResponse> {
+            override fun onResponse(call: Call<FireBaseLogInResponse>, response: Response<FireBaseLogInResponse>) {
                 if (response.isSuccessful) {
                     callback(response.body()?.idToken)
                 } else {
@@ -26,7 +27,7 @@ class LoginRepository {
                 }
             }
 
-            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+            override fun onFailure(call: Call<FireBaseLogInResponse>, t: Throwable) {
                 Log.e("LoginRepository", "Erreur réseau: ${t.localizedMessage}", t)
                 callback(null)
             }

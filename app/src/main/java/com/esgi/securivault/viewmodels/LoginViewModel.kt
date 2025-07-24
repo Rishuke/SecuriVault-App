@@ -16,9 +16,13 @@ import javax.inject.Inject
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+// AJOUTE CETTE IMPORT
+import com.esgi.securivault.repository.LoginRepository
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(): ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val loginRepository: LoginRepository
+): ViewModel() {
     val email = mutableStateOf("")
     val password = mutableStateOf("")
     val error = mutableStateOf<String?>(null)
@@ -33,30 +37,41 @@ class LoginViewModel @Inject constructor(): ViewModel() {
                     ?.addOnSuccessListener { tokenResult ->
                         val idToken = tokenResult.token
                         if (idToken != null) {
-                            println("✅ TOKEN = $idToken")
-                            // Ici appelle ton repository pour faire la requête HTTP avec le token
-                            loginSuccess.value = true
+                            println("✅ FIREBASE TOKEN = $idToken")
+
+
+                            loginRepository.loginUser(email.value, password.value) { serverToken ->
+                                if (serverToken != null) {
+                                    println("✅ SERVER TOKEN = $serverToken")
+                                    // Stocke le token serveur si nécessaire
+                                    loginSuccess.value = true
+                                } else {
+                                    error.value = "Erreur de connexion au serveur"
+                                }
+                                isLoading.value = false
+                            }
+
                         } else {
-                            error.value = "Token introuvable"
+                            error.value = "Token Firebase introuvable"
+                            isLoading.value = false
                         }
-                        isLoading.value = false
                     }
                     ?.addOnFailureListener { e ->
-                        error.value = "Erreur token : ${e.localizedMessage}"
+                        error.value = "Erreur token Firebase : ${e.localizedMessage}"
                         isLoading.value = false
                     }
             }
             .addOnFailureListener { e ->
-                error.value = e.localizedMessage ?: "Erreur connexion"
+                error.value = e.localizedMessage ?: "Erreur connexion Firebase"
                 isLoading.value = false
             }
     }
-
 
     fun launchGoogleSignIn(launcher: ActivityResultLauncher<Intent>, context: Context) {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(com.esgi.securivault.R.string.default_web_client_id))
             .requestEmail()
+            .requestProfile()
             .build()
         val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
         launcher.launch(googleSignInClient.signInIntent)
@@ -67,11 +82,20 @@ class LoginViewModel @Inject constructor(): ViewModel() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener { task ->
-                isLoading.value = false
                 if (task.isSuccessful) {
-                    loginSuccess.value = true
+                    // Pour Google aussi, tu peux ajouter l'appel au serveur ici si nécessaire
+                    val firebaseUser = task.result?.user
+                    firebaseUser?.getIdToken(true)?.addOnSuccessListener { tokenResult ->
+                        val firebaseToken = tokenResult.token
+                        if (firebaseToken != null) {
+                            // Optionnel : appel serveur pour Google login aussi
+                            loginSuccess.value = true
+                        }
+                        isLoading.value = false
+                    }
                 } else {
                     error.value = "Erreur connexion Google"
+                    isLoading.value = false
                 }
             }
     }
