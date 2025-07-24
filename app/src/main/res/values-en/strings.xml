@@ -1,0 +1,66 @@
+<resources>
+    <string name="app_name">SecuriVault</string>
+    <string name="welcome_title">SecuriVault</string>
+    <string name="welcome_subtitle">Smart security system</string>
+    <string name="motion_alert_title">MOTION DETECTED!</string>
+    <string name="status_secure">Secured</string>
+    <string name="motion_alert_acceleration">Acceleration: %1$s G</string>
+    <string name="motion_alert_time">Time: %1$s</string>
+    <string name="gps_section_title">GPS Position</string>
+    <string name="gps_latitude">Latitude: %1$s°</string>
+    <string name="gps_longitude">Longitude: %1$s°</string>
+    <string name="gps_speed">GPS Speed: %1$s m/s</string>
+    <string name="debug_section_title">Debug Information</string>
+    <string name="debug_raw_value">Raw value: %1$s</string>
+    <string name="debug_final_speed">Final speed: %1$s G</string>
+    <string name="system_status">System Status</string>
+    <string name="label_security">Security</string>
+    <string name="label_connection">Connection</string>
+    <string name="label_battery">Battery</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="last_update">Last update: %1$s</string>
+    <string name="footer_secure">AES-256 encryption • Secured by Firebase</string>
+    <string name="login_title">Login to your case</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_google_button">Login with Google</string>
+    <string name="create_account">Create an account</string>
+    <string name="register_title">Create an account</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="register_button">Sign up</string>
+    <string name="already_have_account">Already have an account? Log in</string>
+    <string name="error_fields_required">All fields are required</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="pin_code_title">Access Code</string>
+    <string name="manage_your_pin">Manage your security code</string>
+    <string name="view_mode">View</string>
+    <string name="edit_mode">Edit</string>
+    <string name="current_code">Current Code</string>
+    <string name="show_code">Show Code</string>
+    <string name="hide_code">Hide Code</string>
+    <string name="new_code">New Code</string>
+    <string name="new_code_label">New code (4 digits)</string>
+    <string name="confirm_code_label">Confirm code</string>
+    <string name="hide">Hide</string>
+    <string name="show">Show</string>
+    <string name="password_mismatch_warning">⚠️ Codes do not match</string>
+    <string name="save_code">Save Code</string>
+    <string name="led_icon_description">LED</string>
+    <string name="color">COLOR</string>
+    <string name="led">LED</string>
+    <string name="choose_color">Choose a color</string>
+    <string name="apply_color">APPLY COLOR</string>
+    <string name="buzzer_icon_description">Buzzer</string>
+    <string name="configuration">CONFIGURATION</string>
+    <string name="buzzer">BUZZER</string>
+    <string name="hertz">Hz</string>
+    <string name="adjust_frequency">Adjust frequency</string>
+    <string name="apply_frequency">APPLY FREQUENCY</string>
+    <string name="hz_200">200 Hz</string>
+    <string name="hz_5000">5000 Hz</string>
+
+
+
+</resources>

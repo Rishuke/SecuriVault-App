@@ -21,6 +21,8 @@ import com.esgi.securivault.viewmodels.SuitcaseViewModel
 import kotlin.math.roundToInt
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
+import com.esgi.securivault.R
 
 
 @Composable
@@ -70,13 +72,13 @@ fun BuzzerSoundScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         imageVector = Icons.Default.VolumeUp,
-                        contentDescription = "Buzzer",
+                        contentDescription = stringResource(R.string.buzzer_icon_description),
                         tint = Color.White,
                         modifier = Modifier.size(80.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "CONFIGURATION",
+                        text = stringResource(R.string.configuration),
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp
@@ -84,7 +86,7 @@ fun BuzzerSoundScreen(
                         color = Color.White
                     )
                     Text(
-                        "BUZZER",
+                        text = stringResource(R.string.buzzer),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Light,
                             letterSpacing = 1.sp
@@ -113,7 +115,7 @@ fun BuzzerSoundScreen(
                                 color = Color.White
                             )
                             Text(
-                                "Hz",
+                                text = stringResource(R.string.hertz),
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Light
                                 ),
@@ -127,7 +129,7 @@ fun BuzzerSoundScreen(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        "Ajustez la fréquence",
+                        text = stringResource(R.string.adjust_frequency),
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White.copy(alpha = 0.8f)
                     )
@@ -156,8 +158,8 @@ fun BuzzerSoundScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("200 Hz", color = Color.White.copy(alpha = 0.7f))
-                                Text("5000 Hz", color = Color.White.copy(alpha = 0.7f))
+                                Text(stringResource(R.string.hz_200), color =  Color.White.copy(alpha = 0.7f))
+                                Text(stringResource(R.string.hz_5000),color = Color.White.copy(alpha = 0.7f))
                             }
                         }
                     }
@@ -184,7 +186,7 @@ fun BuzzerSoundScreen(
                         )
                     } else {
                         Text(
-                            "APPLIQUER LA FRÉQUENCE",
+                            text = stringResource(R.string.apply_frequency),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp

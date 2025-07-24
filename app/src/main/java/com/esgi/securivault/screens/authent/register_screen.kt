@@ -10,10 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.esgi.securivault.R
 import com.esgi.securivault.ui.theme.NavigationComposeTheme
 
 @Composable
@@ -26,6 +28,16 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+
+    val appName = stringResource(id = R.string.app_name)
+    val registerTitle = stringResource(id = R.string.register_title)
+    val emailLabel = stringResource(id = R.string.email)
+    val passwordLabel = stringResource(id = R.string.password)
+    val confirmPasswordLabel = stringResource(id = R.string.confirm_password)
+    val registerButton = stringResource(id = R.string.register_button)
+    val alreadyHaveAccount = stringResource(id = R.string.already_have_account)
+    val errorFieldsRequired = stringResource(id = R.string.error_fields_required)
+    val errorPasswordMismatch = stringResource(id = R.string.error_password_mismatch)
 
     Box(
         modifier = Modifier
@@ -43,7 +55,7 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "SecuriVault",
+                text = appName,
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.White
             )
@@ -61,7 +73,7 @@ fun RegisterScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Créer un compte",
+                        text = registerTitle,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = Color(0xFF0D1B2A)
                     )
@@ -69,14 +81,14 @@ fun RegisterScreen(
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("Email") },
+                        label = { Text(emailLabel) },
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Mot de passe") },
+                        label = { Text(passwordLabel) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -84,7 +96,7 @@ fun RegisterScreen(
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
-                        label = { Text("Confirmer mot de passe") },
+                        label = { Text(confirmPasswordLabel) },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -94,24 +106,25 @@ fun RegisterScreen(
                     } else {
                         Button(
                             onClick = {
-                                if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                                    error = "Tous les champs sont requis"
-                                } else if (password != confirmPassword) {
-                                    error = "Les mots de passe ne correspondent pas"
-                                } else {
-                                    isLoading = true
-                                    onRegisterSuccess()
+                                error = when {
+                                    email.isBlank() || password.isBlank() || confirmPassword.isBlank() -> errorFieldsRequired
+                                    password != confirmPassword -> errorPasswordMismatch
+                                    else -> {
+                                        isLoading = true
+                                        onRegisterSuccess()
+                                        null
+                                    }
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A), contentColor = Color.White)
                         ) {
-                            Text("S'inscrire")
+                            Text(registerButton)
                         }
                     }
 
                     TextButton(onClick = onNavigateToLogin) {
-                        Text("Déjà un compte ? Se connecter")
+                        Text(alreadyHaveAccount)
                     }
 
                     error?.let {
@@ -122,6 +135,7 @@ fun RegisterScreen(
         }
     }
 }
+
 
 
 
