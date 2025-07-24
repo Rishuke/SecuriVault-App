@@ -1,4 +1,3 @@
-
 package com.esgi.securivault.screens.authent
 
 import androidx.compose.foundation.background
@@ -14,17 +13,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.esgi.securivault.viewmodels.RegisterViewModel
 
 @Composable
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
+    // Récupération des états du ViewModel
+    val email by viewModel.email
+    val password by viewModel.password
+    val confirmPassword by viewModel.confirmPassword
+    val isLoading by viewModel.isLoading
+    val error by viewModel.error
+
+    // Configuration du callback de succès
+    LaunchedEffect(Unit) {
+        viewModel.setOnRegisterSuccess(onRegisterSuccess)
+    }
 
     Box(
         modifier = Modifier
@@ -67,25 +75,28 @@ fun RegisterScreen(
 
                     OutlinedTextField(
                         value = email,
-                        onValueChange = { email = it },
+                        onValueChange = { viewModel.email.value = it },
                         label = { Text("Email") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
                     )
 
                     OutlinedTextField(
                         value = password,
-                        onValueChange = { password = it },
+                        onValueChange = { viewModel.password.value = it },
                         label = { Text("Mot de passe") },
                         visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
                     )
 
                     OutlinedTextField(
                         value = confirmPassword,
-                        onValueChange = { confirmPassword = it },
+                        onValueChange = { viewModel.confirmPassword.value = it },
                         label = { Text("Confirmer mot de passe") },
                         visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
                     )
 
                     if (isLoading) {
@@ -93,36 +104,37 @@ fun RegisterScreen(
                     } else {
                         Button(
                             onClick = {
-                                if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
-                                    error = "Tous les champs sont requis"
-                                } else if (password != confirmPassword) {
-                                    error = "Les mots de passe ne correspondent pas"
-                                } else {
-                                    isLoading = true
-                                    onRegisterSuccess()
-                                }
+                                viewModel.register()
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D1B2A), contentColor = Color.White)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF0D1B2A),
+                                contentColor = Color.White
+                            )
                         ) {
                             Text("S'inscrire")
                         }
                     }
 
-                    TextButton(onClick = onNavigateToLogin) {
+                    TextButton(
+                        onClick = onNavigateToLogin,
+                        enabled = !isLoading
+                    ) {
                         Text("Déjà un compte ? Se connecter")
                     }
 
                     error?.let {
-                        Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            text = it,
+                            color = Color.Red,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
         }
     }
 }
-
-
 
 @Preview
 @Composable
@@ -132,4 +144,3 @@ fun RegisterScreenPreview() {
         onNavigateToLogin = {}
     )
 }
-

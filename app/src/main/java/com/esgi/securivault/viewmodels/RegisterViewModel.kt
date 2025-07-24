@@ -1,4 +1,4 @@
-/*package com.esgi.securivault.viewmodels
+package com.esgi.securivault.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -24,10 +24,17 @@ class RegisterViewModel @Inject constructor(
     }
 
     fun register() {
+        // Reset de l'erreur précédente
+        error.value = null
+
         // Validation des champs
         when {
             email.value.isBlank() -> {
                 error.value = "L'email est requis"
+                return
+            }
+            !isValidEmail(email.value) -> {
+                error.value = "L'email n'est pas valide"
                 return
             }
             password.value.isBlank() -> {
@@ -49,16 +56,28 @@ class RegisterViewModel @Inject constructor(
         }
 
         isLoading.value = true
-        error.value = null
 
-        registerRepository.registerUser(email.value, password.value) { success, errorMessage ->
+        registerRepository.registerUser(email.value, password.value, confirmPassword.value) { success, errorMessage ->
             isLoading.value = false
 
             if (success) {
+                // Reset des champs en cas de succès
+                clearFields()
                 onRegisterSuccess?.invoke()
             } else {
                 error.value = errorMessage ?: "Erreur lors de la création du compte"
             }
         }
     }
-}*/
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun clearFields() {
+        email.value = ""
+        password.value = ""
+        confirmPassword.value = ""
+        error.value = null
+    }
+}

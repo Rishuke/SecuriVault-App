@@ -1,4 +1,4 @@
-/*package com.esgi.securivault.repository
+package com.esgi.securivault.repository
 
 import android.util.Log
 import com.esgi.securivault.data.dto.RegisterDTO
@@ -15,8 +15,8 @@ class RegisterRepository {
 
     fun registerUser(email: String, password: String, confirmpassword: String, callback: (Boolean, String?) -> Unit) {
         val request = RegisterDTO(email, password, confirmpassword)
-        registerServices.createUser(request).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+        registerServices.createUser(request).enqueue(object : Callback<RegisterDTO> {
+            override fun onResponse(call: Call<RegisterDTO>, response: Response<RegisterDTO>) {
                 if (response.isSuccessful) {
                     Log.d("RegisterRepository", "Utilisateur créé avec succès")
                     callback(true, null)
@@ -36,10 +36,10 @@ class RegisterRepository {
                 }
             }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
+            override fun onFailure(call: Call<RegisterDTO>, t: Throwable) {
                 Log.e("RegisterRepository", "Erreur réseau: ${t.localizedMessage}", t)
                 callback(false, "Erreur de connexion")
             }
         })
     }
-}*/
+}
