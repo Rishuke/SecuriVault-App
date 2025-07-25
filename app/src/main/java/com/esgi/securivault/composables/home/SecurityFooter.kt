@@ -15,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.esgi.securivault.R
 
 
 @Composable
@@ -35,7 +37,7 @@ fun SecurityFooter() {
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = "Chiffrement AES-256 • Sécurisé par Firebase",
+            text = stringResource(R.string.footer_secure),
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.6f)
         )

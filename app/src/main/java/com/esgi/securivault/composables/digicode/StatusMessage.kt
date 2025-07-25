@@ -24,7 +24,8 @@ import com.esgi.securivault.viewmodels.UiState
 
 
 @Composable
-fun StatusMessages(uiState: UiState) {
+fun StatusMessages(uiState: Any) {
+    // Remplacer par les propriétés réelles de votre UiState
     val successMessage: String? = null // uiState.successMessage
     val errorMessage: String? = null // uiState.errorMessage
 

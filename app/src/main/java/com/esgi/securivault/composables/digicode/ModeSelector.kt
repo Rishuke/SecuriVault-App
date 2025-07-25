@@ -12,8 +12,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-
+import com.esgi.securivault.R
 
 @Composable
 fun ModeSelector(
@@ -31,7 +32,8 @@ fun ModeSelector(
             modifier = Modifier.padding(8.dp)
         ) {
             ModeButton(
-                text = "Consulter",
+                text = stringResource(R.string.view_mode),
+
                 icon = Icons.Default.Visibility,
                 isSelected = isViewMode,
                 onClick = { onModeChange(true) },
@@ -39,7 +41,8 @@ fun ModeSelector(
             )
 
             ModeButton(
-                text = "Modifier",
+                text = stringResource(R.string.edit_mode),
+
                 icon = Icons.Default.Edit,
                 isSelected = !isViewMode,
                 onClick = { onModeChange(false) },

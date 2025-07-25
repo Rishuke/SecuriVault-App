@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.esgi.securivault.R
 
 
 @Composable
@@ -63,7 +65,7 @@ fun CodeChangeSection(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = "Nouveau Code",
+                text = stringResource(R.string.new_code),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -75,14 +77,15 @@ fun CodeChangeSection(
             OutlinedTextField(
                 value = newCode,
                 onValueChange = onNewCodeChange,
-                label = { Text("Nouveau code (4 chiffres)", color = Color.White.copy(alpha = 0.7f)) },
+                label = {  Text(stringResource(R.string.new_code_label), color = Color.White.copy(alpha = 0.7f)) },
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 trailingIcon = {
                     IconButton(onClick = onToggleVisibility) {
                         Icon(
                             imageVector = if (showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (showPassword) "Masquer" else "Afficher",
+                            contentDescription = if (showPassword) stringResource(R.string.hide) else stringResource(
+                                R.string.show),
                             tint = Color.White
                         )
                     }
@@ -99,7 +102,7 @@ fun CodeChangeSection(
             OutlinedTextField(
                 value = confirmCode,
                 onValueChange = onConfirmCodeChange,
-                label = { Text("Confirmer le code", color = Color.White.copy(alpha = 0.7f)) },
+                label = {  Text(stringResource(R.string.confirm_code_label),  color = Color.White.copy(alpha = 0.7f)) },
                 visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth(),
@@ -115,7 +118,7 @@ fun CodeChangeSection(
 
             if (confirmCode.isNotEmpty() && newCode != confirmCode) {
                 Text(
-                    text = "⚠️ Les codes ne correspondent pas",
+                    text = stringResource(R.string.password_mismatch_warning),
                     color = Color.Red,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -149,7 +152,7 @@ fun CodeChangeSection(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Enregistrer le Code",
+                            text = stringResource(R.string.save_code),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp
                         )

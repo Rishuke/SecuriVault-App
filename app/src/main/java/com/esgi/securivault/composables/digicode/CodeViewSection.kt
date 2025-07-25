@@ -27,10 +27,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.esgi.securivault.R
 
 
 @Composable
@@ -51,7 +53,7 @@ fun CodeViewSection(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Code Actuel",
+                text = stringResource(R.string.current_code),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -115,10 +117,12 @@ fun CodeViewSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (showCurrentCode) "Masquer le Code" else "Afficher le Code",
+                    text = if (showCurrentCode) stringResource(R.string.hide_code) else stringResource(
+                        R.string.show_code),
                     fontWeight = FontWeight.SemiBold
                 )
             }
         }
     }
 }
+

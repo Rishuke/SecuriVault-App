@@ -19,11 +19,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-
-
+import com.esgi.securivault.R
 
 @Composable
 fun StatusSection(
@@ -43,7 +43,7 @@ fun StatusSection(
             modifier = Modifier.padding(24.dp)
         ) {
             Text(
-                text = "État du Système",
+                text = stringResource(R.string.system_status),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -57,7 +57,7 @@ fun StatusSection(
             ) {
                 StatusIndicator(
                     icon = Icons.Default.Security,
-                    label = "Sécurité",
+                    label = stringResource(R.string.label_security),
                     status = securityStatus,
                     color = if (securityStatus.contains("Mouvement") || securityStatus.contains("⚠️"))
                         Color(0xFFFF5722) else Color(0xFF4CAF50)
@@ -65,14 +65,15 @@ fun StatusSection(
 
                 StatusIndicator(
                     icon = Icons.Default.Wifi,
-                    label = "Connexion",
-                    status = if (isConnected) "Connecté" else "Déconnecté",
+                    label = stringResource(R.string.label_connection),
+                    status = if (isConnected) stringResource(R.string.status_connected) else stringResource(
+                        R.string.status_disconnected),
                     color = if (isConnected) Color(0xFF2196F3) else Color(0xFFFF5722)
                 )
 
                 StatusIndicator(
                     icon = Icons.Default.Battery6Bar,
-                    label = "Batterie",
+                    label = stringResource(R.string.label_battery),
                     status = batteryLevel,
                     color = Color(0xFF64FFDA)
                 )
@@ -81,7 +82,7 @@ fun StatusSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Dernière mise à jour: $lastUpdateTime",
+                text = stringResource(R.string.last_update, lastUpdateTime),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.White.copy(alpha = 0.6f),
                 textAlign = TextAlign.Center,

@@ -48,22 +48,5 @@ fun StatusIndicator(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
-
-        Text(
-            text = status,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = color,
-            textAlign = TextAlign.Center,
-            maxLines = 2
-        )
     }
 }

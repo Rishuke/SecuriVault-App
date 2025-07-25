@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun SafeVaultDisplay(currentSpeed: Double) {
     Box(
@@ -31,8 +30,8 @@ fun SafeVaultDisplay(currentSpeed: Double) {
     ) {
         val isShaking = currentSpeed >= 1.15
         val mainColor = if (isShaking) Color(0xFFFF5722) else Color(0xFF64FFDA)
+        val secondaryColor = if (isShaking) Color(0xFF8B0000) else Color(0xFF1E3A5F)
 
-        // Cercle externe avec effet de lueur
         Box(
             modifier = Modifier
                 .size(300.dp)
