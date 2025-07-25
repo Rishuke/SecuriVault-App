@@ -70,7 +70,6 @@ android {
     }
 
 }
-
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation(libs.androidx.core.ktx)
@@ -127,6 +126,4 @@ dependencies {
     // Pour les requêtes HTTP (si pas déjà présent)
     implementation (libs.kotlinx.coroutines.android)
     testImplementation(kotlin("test"))
-
-
 }

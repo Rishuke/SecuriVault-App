@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import org.osmdroid.config.Configuration
@@ -17,7 +16,6 @@ import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun LuggageMapScreen(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
 
     // Configuration OSMDroid
     LaunchedEffect(Unit) {
